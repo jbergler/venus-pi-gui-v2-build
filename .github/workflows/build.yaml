@@ -8,10 +8,17 @@ on:
         required: true
         type: string
         default: 'main'
+      create_release:
+        description: 'Create a GitHub release'
+        required: true
+        type: boolean
+        default: false
 
 jobs:
   build:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write  # Required for creating releases
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -19,25 +26,34 @@ jobs:
           repository: victronenergy/gui-v2
           ref: ${{ github.event.inputs.gui_v2_ref }}
           submodules: recursive
-      
-      - name: Run build-gx-install-requirements script
+
+      - name: Version
+        run: echo "version=$(git describe --tags --always)" >> $GITHUB_ENV  
+
+      - name: Env
         run: ./scripts/build-gx-install-requirements.sh
       
-      - name: Build for GX device
+      - name: Build
         run: ./scripts/build-gx.sh
-      
+    
       - name: Create tarball for deployment
-        run: |
-          cd build-gx_files_to_copy
-          tar -czf ../venus-gui-v2.tar.gz .
-          cd ..
-          sha256sum venus-gui-v2.tar.gz > venus-gui-v2.tar.gz.sha256
+        run: tar -czvf venus-gui-v2.tar.gz -C build-gx_files_to_copy .
       
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: venus-gui-v2
-          path: |
+          path: venus-gui-v2.tar.gz
+          retention-days: 90
+      
+      - name: Create or Update Release
+        if: ${{ github.event.inputs.create_release }}
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.steps.version.outputs.version }}
+          body_path: build-info.txt
+          files: |
             venus-gui-v2.tar.gz
-            venus-gui-v2.tar.gz.sha256
-          retention-days: 180
+            install.sh
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
