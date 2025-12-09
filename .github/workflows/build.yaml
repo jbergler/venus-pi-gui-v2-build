@@ -10,33 +10,33 @@ on:
         default: 'main'
 
 jobs:
-  build-gx:
+  build:
     runs-on: ubuntu-24.04
-    
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ github.event.inputs.gui_v2_ref }}
-        submodules: recursive
-    
-    - name: Run build-gx-install-requirements script
-      run: ./scripts/build-gx-install-requirements.sh
-    
-    - name: Build for GX device
-      run: ./scripts/build-gx.sh
-    
-    - name: Create tarball for deployment
-      run: |
-        cd build-gx_files_to_copy
-        tar -czf ../venus-gui-v2.tar.gz .
-        cd ..
-        sha256sum venus-gui-v2.tar.gz > venus-gui-v2.tar.gz.sha256
-    
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: venus-gui-v2
-        path: |
-          venus-gui-v2.tar.gz
-          venus-gui-v2.tar.gz.sha256
-        retention-days: 180
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.gui_v2_ref }}
+          submodules: recursive
+      
+      - name: Run build-gx-install-requirements script
+        run: ./scripts/build-gx-install-requirements.sh
+      
+      - name: Build for GX device
+        run: ./scripts/build-gx.sh
+      
+      - name: Create tarball for deployment
+        run: |
+          cd build-gx_files_to_copy
+          tar -czf ../venus-gui-v2.tar.gz .
+          cd ..
+          sha256sum venus-gui-v2.tar.gz > venus-gui-v2.tar.gz.sha256
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: venus-gui-v2
+          path: |
+            venus-gui-v2.tar.gz
+            venus-gui-v2.tar.gz.sha256
+          retention-days: 180
