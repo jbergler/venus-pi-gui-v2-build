@@ -35,8 +35,10 @@ jobs:
           echo "version=$(git describe --tags --always)" >> $GITHUB_ENV
 
       - name: Env
-        run: ./scripts/build-gx-install-requirements.sh
-      
+        run: |
+          sed -i 's|/venus/candidate/|/venus/testing/|g' ./scripts/build-gx-install-requirements.sh
+          ./scripts/build-gx-install-requirements.sh
+        
       - name: Build
         run: ./scripts/build-gx.sh
     
@@ -82,7 +84,7 @@ jobs:
             
             Run this one-liner on your Venus device as root:
             ```bash
-            curl -fsSL https://github.com/${{ github.repository }}/releases/download/${{ env.version }}/install.sh | sh
+            curl -fsSL https://github.com/${{ github.repository }}/releases/download/${{ env.version }}/install.sh | TAG=${{ env.version }} sh
             ```
           files: |
             venus-gui-v2.tar.gz
