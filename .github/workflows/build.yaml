@@ -1,4 +1,4 @@
-name: Build GX Device Package
+name: Build gui-v2 for pi
 
 on:
   workflow_dispatch:
@@ -14,8 +14,9 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
+          repository: victronenergy/gui-v2
           ref: ${{ github.event.inputs.gui_v2_ref }}
           submodules: recursive
       
