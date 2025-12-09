@@ -25,10 +25,14 @@ jobs:
         with:
           repository: victronenergy/gui-v2
           ref: ${{ github.event.inputs.gui_v2_ref }}
+          fetch-depth: 100
+          fetch-tags: true
           submodules: recursive
 
       - name: Version
-        run: echo "version=$(git describe --tags --always)" >> $GITHUB_ENV  
+        run: |
+          git describe --tags --always
+          echo "version=$(git describe --tags --always)" >> $GITHUB_ENV
 
       - name: Env
         run: ./scripts/build-gx-install-requirements.sh
